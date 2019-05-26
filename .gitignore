@@ -1,6 +1,8 @@
 # Prerequisites
 *.d
-
+data.txt
+kmeans
+result.txt
 # Compiled Object files
 *.slo
 *.lo

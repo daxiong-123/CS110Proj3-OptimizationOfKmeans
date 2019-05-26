@@ -28,6 +28,8 @@
 /*********************************************************
         Your extra headers and static declarations
  *********************************************************/
+#include <omp.h>
+#include <string.h>
 
 /*********************************************************
                            End
@@ -63,7 +65,7 @@ main (int argc, char *argv[])
        K-Means),and read in all data points into static array `data`. */
     int pn, cn;
 
-    fscanf(fi, "%d / %d\n", &pn, &cn);
+    if(fscanf(fi, "%d / %d\n", &pn, &cn)){}
 
     point_t * const data = new point_t[pn];
     color_t * const coloring = new color_t[pn];
@@ -149,7 +151,9 @@ kmeans (point_t * const data, point_t * const mean, color_t * const coloring,
         const int pn, const int cn)
 {
     bool converge = true;
-
+    double *x_mean = new double [cn];
+    double *y_mean = new double [cn];
+    int *count_mean = new int [cn];
     /* Loop through the following two stages until no point changes its color
        during an iteration. */
     do {
@@ -157,10 +161,10 @@ kmeans (point_t * const data, point_t * const mean, color_t * const coloring,
 
         /* Compute the color of each point. A point gets assigned to the
            cluster with the nearest center point. */
+        #pragma omp parallel for
         for (int i = 0; i < pn; ++i) {
             color_t new_color = cn;
             double min_dist = std::numeric_limits<double>::infinity();
-
             for (color_t c = 0; c < cn; ++c) {
                 double dist = sqrt(pow(data[i].getX() - mean[c].getX(), 2) +
                                    pow(data[i].getY() - mean[c].getY(), 2));
@@ -178,10 +182,25 @@ kmeans (point_t * const data, point_t * const mean, color_t * const coloring,
 
         /* Calculate the new mean for each cluster to be the current average
            of point positions in the cluster. */
+        memset(x_mean, 0, cn*sizeof(double));
+        memset(y_mean, 0, cn*sizeof(double));
+        memset(count_mean, 0, cn*sizeof(int));
+        
+        for(int i=0; i < pn; i++){
+            x_mean[coloring[i]] += data[i].getX();
+            y_mean[coloring[i]] += data[i].getY();
+            count_mean[coloring[i]]++;
+        }
+        
+        for(int i=0; i < cn; i++){
+            mean[i].setXY(x_mean[i]/count_mean[i], y_mean[i]/count_mean[i]);
+        }
+
+        /*#pragma omp parallel for
         for (color_t c = 0; c < cn; ++c) {
             double sum_x = 0, sum_y = 0;
             int count = 0;
-
+            
             for (int i = 0; i < pn; ++i) {
                 if (coloring[i] == c) {
                     sum_x += data[i].getX();
@@ -191,7 +210,7 @@ kmeans (point_t * const data, point_t * const mean, color_t * const coloring,
             }
 
             mean[c].setXY(sum_x / count, sum_y / count);
-        }
+        }*/
     } while (!converge);
 }
 
