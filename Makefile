@@ -18,6 +18,12 @@ kmeans: kmeans.cpp kmeans.h
 
 .PHONY: clean gen plot
 
+run:
+	./kmeans data.txt result.txt
+
+rem:
+	rm result.txt
+
 clean:
 	rm -f kmeans
 
@@ -25,4 +31,4 @@ gen: generate.py
 	python3 generate.py ${FILE}
 
 plot: plot.py
-	python3 plot.py ${FILE}
+	python3 plot.py result.txt
