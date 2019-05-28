@@ -182,21 +182,21 @@ kmeans (point_t * const data, point_t * const mean, color_t * const coloring,
 
         /* Calculate the new mean for each cluster to be the current average
            of point positions in the cluster. */
-        memset(x_mean, 0, cn*sizeof(double));
+        /*memset(x_mean, 0, cn*sizeof(double));
         memset(y_mean, 0, cn*sizeof(double));
         memset(count_mean, 0, cn*sizeof(int));
 
-        
+        #pragma omp parallel for 
         for(int i=0; i < pn; i++){
-            
+            #pragma omp atomic 
             x_mean[coloring[i]] += data[i].getX();
-            
+            #pragma omp atomic 
             y_mean[coloring[i]] += data[i].getY();
-            
+            #pragma omp atomic 
             count_mean[coloring[i]]++;
-        }
+        }*/
 
-        /*#pragma omp parallel for
+        #pragma omp parallel for
         for (color_t c = 0; c < cn; ++c) {
             double sum_x = 0, sum_y = 0;
             int count = 0;
@@ -210,7 +210,7 @@ kmeans (point_t * const data, point_t * const mean, color_t * const coloring,
             }
 
             mean[c].setXY(sum_x / count, sum_y / count);
-        }*/
+        }
     
     } while (!converge);
     
