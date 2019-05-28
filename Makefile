@@ -24,6 +24,12 @@ run:
 
 .PHONY: clean gen plot
 
+run:
+	./kmeans data.txt result.txt
+
+rem:
+	rm result.txt
+
 clean:
 	rm -f kmeans
 
