@@ -9,9 +9,10 @@
 #
 
 CC=g++
-CFLAGS=-Wpedantic -Wall -Wextra -Werror -O2 -fopenmp -std=c++11
+CFLAGS=-Wpedantic -Wall -Wextra -Werror -O3 -fopenmp -std=c++11 -march=native
 
 all: kmeans
+
 rem:
 	rm result.txt
 run: 

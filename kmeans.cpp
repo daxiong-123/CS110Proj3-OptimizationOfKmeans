@@ -30,7 +30,7 @@
  *********************************************************/
 #include <omp.h>
 #include <string.h>
-
+#include <immintrin.h>
 /*********************************************************
                            End
  *********************************************************/
@@ -151,6 +151,10 @@ kmeans (point_t * const data, point_t * const mean, color_t * const coloring,
         const int pn, const int cn)
 {
     bool converge = true;
+    /*
+    double *x_mean = new double [cn];
+    double *y_mean = new double [cn];
+    int *count_mean = new int [cn];*/
     double *x_mean = new double [cn];
     double *y_mean = new double [cn];
     int *count_mean = new int [cn];
@@ -159,9 +163,13 @@ kmeans (point_t * const data, point_t * const mean, color_t * const coloring,
     do {
         converge = true;
 
+        memset(x_mean, 0, cn*sizeof(double));
+        memset(y_mean, 0, cn*sizeof(double));
+        memset(count_mean, 0, cn*sizeof(int));
+
         /* Compute the color of each point. A point gets assigned to the
            cluster with the nearest center point. */
-        #pragma omp parallel for
+        #pragma omp parallel for 
         for (int i = 0; i < pn; ++i) {
             color_t new_color = cn;
             double min_dist = std::numeric_limits<double>::infinity();
@@ -178,20 +186,19 @@ kmeans (point_t * const data, point_t * const mean, color_t * const coloring,
                 coloring[i] = new_color;
                 converge = false;
             }
+
         }
-
-        /* Calculate the new mean for each cluster to be the current average
-           of point positions in the cluster. */
-        memset(x_mean, 0, cn*sizeof(double));
-        memset(y_mean, 0, cn*sizeof(double));
-        memset(count_mean, 0, cn*sizeof(int));
-
-        for(int i=0; i < pn; i++){
+        #pragma omp parallel for reduction(+: x_mean[:cn],y_mean[:cn],count_mean[:cn])
+        for (int i = 0; i < pn; ++i){
             x_mean[coloring[i]] += data[i].getX();
             y_mean[coloring[i]] += data[i].getY();
             count_mean[coloring[i]]++;
         }
+        /* Calculate the new mean for each cluster to be the current average
+           of point positions in the cluster. */
 
+
+        #pragma omp parallel for
         for(int i=0; i < cn; i++){
             mean[i].setXY(x_mean[i]/count_mean[i], y_mean[i]/count_mean[i]);
         }
