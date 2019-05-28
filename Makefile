@@ -9,32 +9,20 @@
 #
 
 CC=g++
-CFLAGS=-Wpedantic -g -fopenmp -Wall -Wextra -Werror -O2 -std=c++11
+CFLAGS=-Wpedantic -Wall -Wextra -Werror -O2 -std=c++11
 
 all: kmeans
 
 kmeans: kmeans.cpp kmeans.h
 	${CC} ${CFLAGS} kmeans.cpp -o kmeans
 
-rme:
-	rm result.txt
-
-run:
-	./kmeans data.txt result.txt
-
 .PHONY: clean gen plot
-
-run:
-	./kmeans data.txt result.txt
-
-rem:
-	rm result.txt
 
 clean:
 	rm -f kmeans
 
 gen: generate.py
-	python3 generate.py data.txt
+	python3 generate.py ${FILE}
 
 plot: plot.py
-	python3 plot.py result.txt
+	python3 plot.py ${FILE}
