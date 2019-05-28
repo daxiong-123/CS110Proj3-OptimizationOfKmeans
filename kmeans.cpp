@@ -186,7 +186,6 @@ kmeans (point_t * const data, point_t * const mean, color_t * const coloring,
         memset(y_mean, 0, cn*sizeof(double));
         memset(count_mean, 0, cn*sizeof(int));
 
-        
         for(int i=0; i < pn; i++){
             x_mean[coloring[i]] += data[i].getX();
             y_mean[coloring[i]] += data[i].getY();
@@ -211,7 +210,7 @@ kmeans (point_t * const data, point_t * const mean, color_t * const coloring,
             }
 
             mean[c].setXY(sum_x / count, sum_y / count);
-        }*/
+        }
     
     } while (!converge);
     
