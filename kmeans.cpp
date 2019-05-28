@@ -186,13 +186,13 @@ kmeans (point_t * const data, point_t * const mean, color_t * const coloring,
         memset(y_mean, 0, cn*sizeof(double));
         memset(count_mean, 0, cn*sizeof(int));
 
-        #pragma omp parallel for 
+        
         for(int i=0; i < pn; i++){
-            #pragma omp atomic 
+            
             x_mean[coloring[i]] += data[i].getX();
-            #pragma omp atomic 
+            
             y_mean[coloring[i]] += data[i].getY();
-            #pragma omp atomic 
+            
             count_mean[coloring[i]]++;
         }
 
