@@ -211,7 +211,7 @@ kmeans (point_t * const data, point_t * const mean, color_t * const coloring,
 
             mean[c].setXY(sum_x / count, sum_y / count);
         }
-    
+    */
     } while (!converge);
     
     delete [] x_mean;
