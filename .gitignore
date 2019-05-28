@@ -1,18 +1,10 @@
 # Prerequisites
 *.d
-<<<<<<< HEAD
 # executable file
-kmeans
+kmeans*
 
 # data file
 *.txt
-=======
-# data file
-*.txt
-#executated file
-kmeans
-
->>>>>>> 9b7e7f470b96a638ab54bd7d05fb7a7de30c69b7
 # Compiled Object files
 *.slo
 *.lo
