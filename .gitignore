@@ -1,8 +1,10 @@
 # Prerequisites
 *.d
-data.txt
+# executable file
 kmeans
-result.txt
+
+# data file
+*.txt
 # Compiled Object files
 *.slo
 *.lo
