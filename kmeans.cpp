@@ -31,6 +31,7 @@
 #include <omp.h>
 #include <string.h>
 #include <immintrin.h>
+#include <algorithm>
 /*********************************************************
                            End
  *********************************************************/
@@ -151,10 +152,6 @@ kmeans (point_t * const data, point_t * const mean, color_t * const coloring,
         const int pn, const int cn)
 {
     bool converge = true;
-    /*
-    double *x_mean = new double [cn];
-    double *y_mean = new double [cn];
-    int *count_mean = new int [cn];*/
     double *x_mean = new double [cn];
     double *y_mean = new double [cn];
     int *count_mean = new int [cn];
@@ -163,32 +160,71 @@ kmeans (point_t * const data, point_t * const mean, color_t * const coloring,
     do {
         converge = true;
 
-        memset(x_mean, 0, cn*sizeof(double));
-        memset(y_mean, 0, cn*sizeof(double));
-        memset(count_mean, 0, cn*sizeof(int));
-
         /* Compute the color of each point. A point gets assigned to the
            cluster with the nearest center point. */
         #pragma omp parallel for 
         for (int i = 0; i < pn; ++i) {
             color_t new_color = cn;
             double min_dist = std::numeric_limits<double>::infinity();
-            for (color_t c = 0; c < cn; ++c) {
-                double dist = sqrt(pow(data[i].getX() - mean[c].getX(), 2) +
-                                   pow(data[i].getY() - mean[c].getY(), 2));
+            for (color_t c = 0; c < cn/4*4; c+=4) {
+                double dis_arr[4];
+                dis_arr[0] = pow(data[i].getX() - mean[c].getX(), 2) +
+                                   pow(data[i].getY() - mean[c].getY(), 2);
+                dis_arr[1] = pow(data[i].getX() - mean[c+1].getX(), 2) +
+                                   pow(data[i].getY() - mean[c+1].getY(), 2);
+                dis_arr[2] = pow(data[i].getX() - mean[c+2].getX(), 2) +
+                                   pow(data[i].getY() - mean[c+2].getY(), 2);
+                dis_arr[3] = pow(data[i].getX() - mean[c+3].getX(), 2) +
+                                   pow(data[i].getY() - mean[c+3].getY(), 2);                                                                                                                        
+                /*__m256d data_4x = _mm256_set_pd(data[i].getX(), data[i].getX(), data[i].getX(), data[i].getX());
+                __m256d data_4y = _mm256_set_pd(data[i].getY(), data[i].getY(), data[i].getY(), data[i].getY());
+                __m256d mean_4x = _mm256_set_pd(mean[c+3].getX(), mean[c+2].getX(), mean[c+1].getX(), mean[c].getX());
+                __m256d mean_4y = _mm256_set_pd(mean[c+3].getY(), mean[c+2].getY(), mean[c+1].getY(), mean[c].getY());
+
+                __m256d x_diff = _mm256_sub_pd(data_4x,mean_4x);
+                __m256d y_diff = _mm256_sub_pd(data_4y,mean_4y);
+                x_diff = _mm256_mul_pd(x_diff,x_diff);
+                y_diff = _mm256_mul_pd(y_diff,y_diff);
+                
+                __m256d dis_square = _mm256_add_pd(x_diff,y_diff);
+
+                _mm256_store_pd(dis_arr, dis_square);*/
+
+                if (dis_arr[0] < min_dist){
+                    min_dist = dis_arr[0];
+                    new_color = c;
+                }
+                if (dis_arr[1] < min_dist){
+                    min_dist = dis_arr[1];
+                    new_color = c + 1;
+                }
+                if (dis_arr[2] < min_dist){
+                    min_dist = dis_arr[2];
+                    new_color = c + 2;
+                }
+                if (dis_arr[3] < min_dist){
+                    min_dist = dis_arr[3];
+                    new_color = c + 3;
+                }
+            }
+            for(color_t c = cn/4*4; c<cn; c++){
+                double dist = pow(data[i].getX() - mean[c].getX(), 2) +
+                                   pow(data[i].getY() - mean[c].getY(), 2);
                 if (dist < min_dist) {
                     min_dist = dist;
                     new_color = c;
                 }
             }
-
             if (coloring[i] != new_color) {
                 coloring[i] = new_color;
                 converge = false;
             }
-
         }
-        #pragma omp parallel for reduction(+: x_mean[:cn],y_mean[:cn],count_mean[:cn])
+
+        memset(x_mean, 0, cn*sizeof(double));
+        memset(y_mean, 0, cn*sizeof(double));
+        memset(count_mean, 0, cn*sizeof(int));
+
         for (int i = 0; i < pn; ++i){
             x_mean[coloring[i]] += data[i].getX();
             y_mean[coloring[i]] += data[i].getY();
@@ -203,22 +239,6 @@ kmeans (point_t * const data, point_t * const mean, color_t * const coloring,
             mean[i].setXY(x_mean[i]/count_mean[i], y_mean[i]/count_mean[i]);
         }
 
-        /*#pragma omp parallel for
-        for (color_t c = 0; c < cn; ++c) {
-            double sum_x = 0, sum_y = 0;
-            int count = 0;
-            
-            for (int i = 0; i < pn; ++i) {
-                if (coloring[i] == c) {
-                    sum_x += data[i].getX();
-                    sum_y += data[i].getY();
-                    count++;
-                }
-            }
-
-            mean[c].setXY(sum_x / count, sum_y / count);
-        }
-    */
     } while (!converge);
     
     delete [] x_mean;
