@@ -188,12 +188,13 @@ kmeans (point_t * const data, point_t * const mean, color_t * const coloring,
 
         
         for(int i=0; i < pn; i++){
-            
             x_mean[coloring[i]] += data[i].getX();
-            
             y_mean[coloring[i]] += data[i].getY();
-            
             count_mean[coloring[i]]++;
+        }
+
+        for(int i=0; i < cn; i++){
+            mean[i].setXY(x_mean[i]/count_mean[i], y_mean[i]/count_mean[i]);
         }
 
         /*#pragma omp parallel for
