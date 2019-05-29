@@ -169,8 +169,8 @@ kmeans (point_t * const data, point_t * const mean, color_t * const coloring,
             double min_dist = std::numeric_limits<double>::infinity();
             #pragma omp simd
             for (color_t c = 0; c < cn; ++c) {
-                double dist = (data[i].x - mean[c].x) * (data[i].x - mean[c].x) +
-                                   (data[i].y - mean[c].y) * (data[i].y - mean[c].y);
+                double dist =pow(data[i].x - mean[c].x, 2) +
+                                   pow(data[i].y - mean[c].y,2);
                 if (dist < min_dist) {
                     min_dist = dist;
                     new_color = c;
@@ -202,6 +202,7 @@ kmeans (point_t * const data, point_t * const mean, color_t * const coloring,
         for(int i=0; i < cn; i++){
             mean[i].setXY(x_mean[i]/count_mean[i], y_mean[i]/count_mean[i]);
         }
+        
     } while (!converge);
     delete [] x_mean;
     delete [] y_mean;
