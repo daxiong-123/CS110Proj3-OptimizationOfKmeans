@@ -169,8 +169,8 @@ kmeans (point_t * const data, point_t * const mean, color_t * const coloring,
             double min_dist = std::numeric_limits<double>::infinity();
             #pragma omp simd
             for (color_t c = 0; c < cn; ++c) {
-                double dist = pow(data[i].getX() - mean[c].getX(), 2) +
-                                   pow(data[i].getY() - mean[c].getY(), 2);
+                double dist = (data[i].x - mean[c].x) * (data[i].x - mean[c].x) +
+                                   (data[i].y - mean[c].y) * (data[i].y - mean[c].y);
                 if (dist < min_dist) {
                     min_dist = dist;
                     new_color = c;
@@ -190,8 +190,8 @@ kmeans (point_t * const data, point_t * const mean, color_t * const coloring,
         memset(count_mean, 0, cn*sizeof(int));
         
         for (int i = 0; i < pn; ++i){
-            x_mean[coloring[i]] += data[i].getX();
-            y_mean[coloring[i]] += data[i].getY();
+            x_mean[coloring[i]] += data[i].x;
+            y_mean[coloring[i]] += data[i].y;
             count_mean[coloring[i]]++;
         }
         /* Calculate the new mean for each cluster to be the current average
